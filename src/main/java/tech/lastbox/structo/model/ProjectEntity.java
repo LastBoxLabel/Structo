@@ -4,7 +4,6 @@ import jakarta.persistence.*;
 
 import java.util.List;
 
-@Table
 @Entity
 public class ProjectEntity {
     @Id
@@ -21,7 +20,7 @@ public class ProjectEntity {
     private List<ContextEntity> contexts;
 
     @Embedded
-    private DiagramsEmbeddable diagrams;
+    private DiagramsEntity diagrams;
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable=false)
