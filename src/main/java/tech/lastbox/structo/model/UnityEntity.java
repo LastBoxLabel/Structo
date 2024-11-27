@@ -11,10 +11,16 @@ public class UnityEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private long id;
 
+    @Column(nullable = false)
     private String name;
 
+    @Column (nullable = false)
     private String type;
 
-    @OneToMany(mappedBy = "unity")
-    private List<RequirementEntity> requirements;
+    @ElementCollection
+    private List<String> requirements;
+
+    @ManyToOne
+    @JoinColumn(name="context_id", nullable = false)
+    private ContextEntity context;
 }
