@@ -13,14 +13,18 @@ public class ContextEntity {
     private Long id;
 
     @Column(nullable=false)
-    private String mindmap;
+    private DiagramsEntity diagram;
 
-    @OneToMany
-    private List<RequirementEntity> requirements;
+    @ElementCollection
+    private List<String> requirements;
 
     @OneToMany
     private List<UnityEntity> unities;
 
     @Enumerated(EnumType.STRING)
     private ContextType contextType;
+
+    @ManyToOne
+    @JoinColumn(name="context_id", nullable=false)
+    private ProjectEntity project;
 }
