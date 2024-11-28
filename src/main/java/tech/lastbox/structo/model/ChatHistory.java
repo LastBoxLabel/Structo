@@ -23,7 +23,7 @@ public class ChatHistory {
     @JsonIgnore
     private ProjectEntity project;
 
-    @OneToMany(mappedBy = "chat_history", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "chatHistory", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<ChatMessage> chatMessages = new ArrayList<>();
 
     public ChatHistory() {}
