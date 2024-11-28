@@ -18,7 +18,6 @@ public class JwtInitializer {
     public JwtInitializer(JwtProperties jwtProperties, TokenRepository tokenRepository) {
         this.jwtProperties = jwtProperties;
         this.tokenRepository = tokenRepository;
-        System.out.println(jwtProperties.getIssuer());
     }
 
     private JwtConfig getJwtConfig() {

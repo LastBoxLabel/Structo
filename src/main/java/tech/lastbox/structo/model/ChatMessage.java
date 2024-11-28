@@ -12,6 +12,7 @@ import java.util.Objects;
 public class ChatMessage {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
+    @JsonIgnore
     private Long id;
 
     private String messageContent;
@@ -28,9 +29,9 @@ public class ChatMessage {
 
     public ChatMessage() {}
 
-    public ChatMessage(String messageContent, Sender sender) {
-        this.messageContent = messageContent;
+    public ChatMessage(Sender sender, String messageContent) {
         this.sender = sender;
+        this.messageContent = messageContent;
     }
 
     public Long getId() {

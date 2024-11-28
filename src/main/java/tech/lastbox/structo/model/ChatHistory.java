@@ -24,6 +24,7 @@ public class ChatHistory {
     private ProjectEntity project;
 
     @OneToMany(mappedBy = "chatHistory", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @JsonIgnore
     private List<ChatMessage> chatMessages = new ArrayList<>();
 
     public ChatHistory() {}
@@ -67,12 +68,13 @@ public class ChatHistory {
         return chatMessages;
     }
 
+
     public void setChatMessages(List<ChatMessage> chatMessages) {
         this.chatMessages = chatMessages;
     }
 
     public boolean addChatMessages(String message, Sender sender) {
-        return chatMessages.add(new ChatMessage(message, sender));
+        return chatMessages.add(new ChatMessage(sender, message));
     }
 
     @Override

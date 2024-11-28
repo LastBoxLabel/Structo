@@ -22,8 +22,7 @@ public class ProjectEntity {
     @ElementCollection
     private List<String> tasks = new ArrayList<>();
 
-    @ElementCollection
-    private List<String> fileStructure = new ArrayList<>();
+    private String fileStructure;
 
     @Column(nullable = false)
     private String diagram;
@@ -38,7 +37,7 @@ public class ProjectEntity {
 
     public ProjectEntity() {}
 
-    public ProjectEntity(long id, String name, String description, List<String> tasks, List<String> fileStructure, String diagram, ChatHistory chatHistory, UserEntity user) {
+    public ProjectEntity(long id, String name, String description, List<String> tasks, String fileStructure, String diagram, ChatHistory chatHistory, UserEntity user) {
         this.id = id;
         this.name = name;
         this.description = description;
@@ -49,11 +48,75 @@ public class ProjectEntity {
         this.user = user;
     }
 
-    public ProjectEntity(String name, String description, List<String> tasks, List<String> fileStructure, String diagram) {
+    public ProjectEntity(String name, String description, List<String> tasks, String fileStructure, String diagram) {
         this.name = name;
         this.description = description;
         this.tasks = tasks;
         this.fileStructure = fileStructure;
         this.diagram = diagram;
+    }
+
+    public long getId() {
+        return id;
+    }
+
+    public void setId(long id) {
+        this.id = id;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public List<String> getTasks() {
+        return tasks;
+    }
+
+    public void setTasks(List<String> tasks) {
+        this.tasks = tasks;
+    }
+
+    public String getFileStructure() {
+        return fileStructure;
+    }
+
+    public void setFileStructure(String fileStructure) {
+        this.fileStructure = fileStructure;
+    }
+
+    public String getDiagram() {
+        return diagram;
+    }
+
+    public void setDiagram(String diagram) {
+        this.diagram = diagram;
+    }
+
+    public ChatHistory getChatHistory() {
+        return chatHistory;
+    }
+
+    public void setChatHistory(ChatHistory chatHistory) {
+        this.chatHistory = chatHistory;
+    }
+
+    public UserEntity getUser() {
+        return user;
+    }
+
+    public void setUser(UserEntity user) {
+        this.user = user;
     }
 }

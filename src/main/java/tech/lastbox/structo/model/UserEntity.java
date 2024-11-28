@@ -34,6 +34,9 @@ public class UserEntity {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<ProjectEntity> projects = new ArrayList<>();
 
+    @JsonIgnore
+    private String role = "USER";
+
     public UserEntity() {}
 
     public UserEntity(String name, String username, String email, String password) {
@@ -45,6 +48,14 @@ public class UserEntity {
 
     public boolean addProject(ProjectEntity project) {
         return this.projects.add(project);
+    }
+
+    public String getRole() {
+        return role;
+    }
+
+    public void setRole(String role) {
+        this.role = role;
     }
 
     public long getId() {

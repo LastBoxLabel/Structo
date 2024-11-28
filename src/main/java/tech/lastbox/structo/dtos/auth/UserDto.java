@@ -1,4 +1,4 @@
-package tech.lastbox.structo.dtos;
+package tech.lastbox.structo.dtos.auth;
 
 import tech.lastbox.structo.model.ProjectEntity;
 

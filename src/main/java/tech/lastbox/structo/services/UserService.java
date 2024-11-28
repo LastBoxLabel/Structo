@@ -2,7 +2,8 @@ package tech.lastbox.structo.services;
 
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
-import tech.lastbox.structo.dtos.UserDto;
+import tech.lastbox.lastshield.security.core.annotations.UserHandler;
+import tech.lastbox.structo.dtos.auth.UserDto;
 import tech.lastbox.structo.exception.user.AlreadyExistsException;
 import tech.lastbox.structo.exception.user.InvalidDataException;
 import tech.lastbox.structo.mappers.UserMapper;
@@ -26,7 +27,7 @@ public class UserService {
     }
 
     public boolean authenticateUser(String email, String rawPassword) {
-        Optional<UserEntity> user = userRepository.findByEmail(email);
+        Optional<UserEntity> user = userRepository.findUserByEmail(email);
         return user.filter(userEntity -> passwordEncoder.matches(rawPassword, userEntity.getPassword())).isPresent();
     }
 

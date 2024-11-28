@@ -1,6 +1,5 @@
 package tech.lastbox.structo.controllers;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -10,7 +9,7 @@ import tech.lastbox.jwt.JwtService;
 import tech.lastbox.jwt.Token;
 import tech.lastbox.structo.config.enviroment.JwtProperties;
 import tech.lastbox.structo.dtos.ErrorResponse;
-import tech.lastbox.structo.dtos.UserDto;
+import tech.lastbox.structo.dtos.auth.UserDto;
 import tech.lastbox.structo.dtos.auth.LoginRequest;
 import tech.lastbox.structo.dtos.auth.LoginResponse;
 import tech.lastbox.structo.dtos.auth.RegisterRequest;
@@ -35,7 +34,6 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
         boolean authentication = userService.authenticateUser(loginRequest.email(), loginRequest.password());
-        System.out.println(jwtProperties.getIssuer());
         if (authentication) {
             Token token = jwtService.generateToken(loginRequest.email(), jwtProperties.getIssuer());
             return ResponseEntity.ok(new LoginResponse(token.token(), loginRequest.email()));
