@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Entity
 @Table(name = "projects")
@@ -32,8 +33,8 @@ public class ProjectEntity {
     private ChatHistory chatHistory;
 
     @ManyToOne
-    @JoinColumn(name = "user_id", nullable=false)
     @JsonIgnore
+    @JoinColumn(name = "user_id", nullable=false)
     private UserEntity user;
 
     public ProjectEntity() {}
@@ -110,8 +111,9 @@ public class ProjectEntity {
         return chatHistory;
     }
 
-    public void setChatHistory(ChatHistory chatHistory) {
+    public ProjectEntity setChatHistory(ChatHistory chatHistory) {
         this.chatHistory = chatHistory;
+        return this;
     }
 
     public UserEntity getUser() {
@@ -120,5 +122,16 @@ public class ProjectEntity {
 
     public void setUser(UserEntity user) {
         this.user = user;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof ProjectEntity project)) return false;
+        return id == project.id || Objects.equals(chatHistory, project.chatHistory) || Objects.equals(user, project.user);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, chatHistory, user);
     }
 }

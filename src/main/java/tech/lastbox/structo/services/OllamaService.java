@@ -51,7 +51,7 @@ public class OllamaService {
         try {
             JsonNode jsonResponse = responseMapper.readTree(response.getBody());
 
-            return Optional.of(jsonResponse.get("response").asText());
+            return Optional.of(jsonResponse.get("response").asText().replace("\\\"", "\""));
         } catch (JsonProcessingException e) {
             return Optional.empty();
         }

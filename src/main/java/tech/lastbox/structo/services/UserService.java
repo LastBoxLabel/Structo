@@ -2,6 +2,7 @@ package tech.lastbox.structo.services;
 
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import tech.lastbox.structo.dtos.auth.UserDto;
 import tech.lastbox.structo.exception.user.AlreadyExistsException;
 import tech.lastbox.structo.exception.user.InvalidDataException;
@@ -37,6 +38,7 @@ public class UserService {
         return user.filter(userEntity -> passwordEncoder.matches(rawPassword, userEntity.getPassword())).isPresent();
     }
 
+    @Transactional
     public ProjectEntity generateProject(String name, String description, UserEntity user) {
        String structure = getStructure(description);
 
@@ -44,9 +46,14 @@ public class UserService {
 
        String diagram = getDiagram(description, structure, tasks);
 
-       return projectService.createProject(name, description, tasks, structure, diagram, user);
+       ProjectEntity project = projectService.createProject(name, description, tasks, structure, diagram, user);
+
+       userRepository.save(user.addProject(project));
+
+       return project;
     }
 
+    @Transactional
     public UserDto registerUser(String name, String username, String email, String rawPassword) throws AlreadyExistsException, InvalidDataException {
         if (userRepository.existsByEmail(email)) throw new AlreadyExistsException("Já existe um usuário com este e-mail.");
         if (userRepository.existsByUsername(username)) throw new AlreadyExistsException("Já existe um usuário com este usuário.");

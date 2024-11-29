@@ -7,6 +7,7 @@ import tech.lastbox.lastshield.security.core.annotations.Username;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Entity
 public class UserEntity {
@@ -105,5 +106,16 @@ public class UserEntity {
 
     public void setProjects(List<ProjectEntity> projects) {
         this.projects = projects;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (!(o instanceof UserEntity that)) return false;
+        return id == that.id || Objects.equals(username, that.username) || Objects.equals(email, that.email);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, username, email);
     }
 }

@@ -15,12 +15,12 @@ public class ChatHistory {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 10000)
     private String baseInfo;
 
-    @OneToOne
-    @JoinColumn(name = "project_id", unique = true)
+    @OneToOne(cascade = CascadeType.ALL)
     @JsonIgnore
+    @JoinColumn(name = "project_id", unique = true)
     private ProjectEntity project;
 
     @OneToMany(mappedBy = "chatHistory", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
@@ -30,10 +30,10 @@ public class ChatHistory {
     public ChatHistory() {}
 
     public ChatHistory(Long id, List<ChatMessage> chatMessages, ProjectEntity project, String baseInfo) {
-        this.chatMessages = chatMessages;
+        this.id = id;
         this.project = project;
         this.baseInfo = baseInfo;
-        this.id = id;
+        this.chatMessages = chatMessages;
     }
 
     public ChatHistory(String baseInfo) {
@@ -81,11 +81,11 @@ public class ChatHistory {
     @Override
     public boolean equals(Object o) {
         if (!(o instanceof ChatHistory that)) return false;
-        return Objects.equals(project, that.project);
+        return Objects.equals(id, that.id) || Objects.equals(project, that.project);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(project);
+        return Objects.hash(id, project);
     }
 }
