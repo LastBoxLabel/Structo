@@ -1,5 +1,9 @@
 package tech.lastbox.structo.services;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 
@@ -26,27 +30,30 @@ public class OllamaService {
 
     public OllamaService(RestTemplateBuilder restTemplateBuilder) {
         this.restTemplate = restTemplateBuilder.build();
-        HttpHeaders headers = new HttpHeaders();
-        headers.setContentType(MediaType.APPLICATION_JSON);
     }
 
-    public ResponseEntity<?> sendPrompt(String promptDescription) {
+    public Optional<String> sendPrompt(String promptDescription) {
+        PromptRequest request = new PromptRequest(
+                model,
+                promptDescription,
+                "json",
+                false
+        );
+
+        ResponseEntity<String> response = restTemplate.postForEntity(
+                OLLAMA_BASE_URL,
+                request,
+                String.class
+        );
+
+        ObjectMapper responseMapper = new ObjectMapper();
+
         try {
-            PromptRequest request = new PromptRequest(
-                    model,
-                    promptDescription,
-                    "json",
-                    false);
+            JsonNode jsonResponse = responseMapper.readTree(response.getBody());
 
-            ResponseEntity<String> response = restTemplate.postForEntity(
-                    OLLAMA_BASE_URL,
-                    request,
-                    String.class);
-
-            return ResponseEntity.ok(Objects.requireNonNull(response.getBody()));
-
-        } catch(RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+            return Optional.of(jsonResponse.get("response").asText());
+        } catch (JsonProcessingException e) {
+            return Optional.empty();
         }
     }
 }

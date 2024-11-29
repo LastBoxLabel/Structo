@@ -46,8 +46,9 @@ public class UserEntity {
         this.password = password;
     }
 
-    public boolean addProject(ProjectEntity project) {
-        return this.projects.add(project);
+    public UserEntity addProject(ProjectEntity project) {
+        projects.add(project);
+        return this;
     }
 
     public String getRole() {

@@ -16,15 +16,16 @@ public class ProjectEntity {
     @Column(nullable=false)
     private String name;
 
-    @Column(nullable=false)
+    @Column(nullable=false, length = 4096)
     private String description;
 
-    @ElementCollection
-    private List<String> tasks = new ArrayList<>();
+    @Column(nullable=false, length = 4096)
+    private String tasks;
 
+    @Column(nullable=false, length = 4096)
     private String fileStructure;
 
-    @Column(nullable = false)
+    @Column(nullable=false, length = 4096)
     private String diagram;
 
     @OneToOne(mappedBy = "project", cascade = CascadeType.ALL)
@@ -37,7 +38,7 @@ public class ProjectEntity {
 
     public ProjectEntity() {}
 
-    public ProjectEntity(long id, String name, String description, List<String> tasks, String fileStructure, String diagram, ChatHistory chatHistory, UserEntity user) {
+    public ProjectEntity(long id, String name, String description, String tasks, String fileStructure, String diagram, ChatHistory chatHistory, UserEntity user) {
         this.id = id;
         this.name = name;
         this.description = description;
@@ -48,12 +49,13 @@ public class ProjectEntity {
         this.user = user;
     }
 
-    public ProjectEntity(String name, String description, List<String> tasks, String fileStructure, String diagram) {
+    public ProjectEntity(String name, String description, String tasks, String fileStructure, String diagram, UserEntity user) {
         this.name = name;
         this.description = description;
         this.tasks = tasks;
         this.fileStructure = fileStructure;
         this.diagram = diagram;
+        this.user = user;
     }
 
     public long getId() {
@@ -80,11 +82,11 @@ public class ProjectEntity {
         this.description = description;
     }
 
-    public List<String> getTasks() {
+    public String getTasks() {
         return tasks;
     }
 
-    public void setTasks(List<String> tasks) {
+    public void setTasks(String tasks) {
         this.tasks = tasks;
     }
 

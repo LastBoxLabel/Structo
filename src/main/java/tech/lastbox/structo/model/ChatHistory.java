@@ -73,8 +73,9 @@ public class ChatHistory {
         this.chatMessages = chatMessages;
     }
 
-    public boolean addChatMessages(String message, Sender sender) {
-        return chatMessages.add(new ChatMessage(sender, message));
+    public ChatHistory addChatMessages(ChatMessage chatMessage) {
+        chatMessages.add(chatMessage);
+        return this;
     }
 
     @Override
