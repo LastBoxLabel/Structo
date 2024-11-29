@@ -15,6 +15,7 @@ public class SecurityConfigInitializer {
         securityConfig.corsAllowCredentials(true)
                 .corsAllowedOrigins(List.of("*"))
                 .corsAllowedMethods(List.of("*"))
+                .addRouteAuthority("/structure")
                 .addRouteAuthority("/login")
                 .addRouteAuthority("/register")
                 .addRouteAuthority("/user", "USER")
