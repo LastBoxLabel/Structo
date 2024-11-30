@@ -9,12 +9,12 @@ import org.springframework.web.bind.annotation.*;
 import tech.lastbox.structo.dtos.ErrorResponse;
 import tech.lastbox.structo.dtos.GenerateRequest;
 import tech.lastbox.structo.dtos.MessageRequest;
-import tech.lastbox.structo.dtos.MessageResponse;
 import tech.lastbox.structo.dtos.auth.UserDto;
 import tech.lastbox.structo.exception.NotFoundException;
 import tech.lastbox.structo.exception.user.AccessForbidden;
 import tech.lastbox.structo.mappers.UserMapper;
 import tech.lastbox.structo.model.UserEntity;
+import tech.lastbox.structo.services.ChatService;
 import tech.lastbox.structo.services.UserService;
 
 @RestController
@@ -23,11 +23,13 @@ public class UserController {
 
     private final UserMapper userMapper;
     private final UserService userService;
+    private final ChatService chatService;
     private final Logger logger = LoggerFactory.getLogger(UserController.class);
 
-    public UserController(UserMapper userMapper, UserService userService) {
+    public UserController(UserMapper userMapper, UserService userService, ChatService chatService) {
         this.userMapper = userMapper;
         this.userService = userService;
+        this.chatService = chatService;
     }
 
     @GetMapping
@@ -46,13 +48,20 @@ public class UserController {
     public ResponseEntity<?> sendMessage(@PathVariable("historyId") Long historyId, @RequestBody MessageRequest messageRequest) {
         UserEntity user = (UserEntity) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         try {
-            userService.createMessage(messageRequest.message(), user, historyId);
+            return ResponseEntity.status(201).body(userService.createMessage(messageRequest.message(), user, historyId));
+        } catch (AccessForbidden | NotFoundException e) {
+            logger.error(e.getMessage());
+        }
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponse("Chat não encontrado.", HttpStatus.NOT_FOUND));
+    }
 
-            return ResponseEntity.status(201).body(new MessageResponse("Messagem registrada."));
-        } catch (AccessForbidden  e) {
-            logger.error("goza em mim bolsonaro");
-        } catch (NotFoundException e) {
-            logger.error("AI LULAAAAAAAAAAAAAA MEU PRESIDENTE");
+    @GetMapping("/project/{historyId}")
+    public ResponseEntity<?> getMessageHistory(@PathVariable("historyId") Long historyId) {
+        UserEntity user = (UserEntity) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        try {
+            return ResponseEntity.ok(chatService.getUserChatHistoryByIdAsJson(historyId, user));
+        } catch (AccessForbidden | NotFoundException e) {
+            logger.error(e.getMessage());
         }
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponse("Chat não encontrado.", HttpStatus.NOT_FOUND));
     }

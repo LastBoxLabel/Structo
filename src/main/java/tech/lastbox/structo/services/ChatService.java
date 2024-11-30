@@ -12,6 +12,7 @@ import tech.lastbox.structo.repositories.ChatHistoryRepository;
 import tech.lastbox.structo.repositories.ChatMessageRepository;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -45,7 +46,7 @@ public class ChatService {
                                                          () -> new NotFoundException("Histórico de chat não encontrado")
                                                      );
 
-        if (!userEntity.equals(user)) throw new AccessForbidden("Este chat não pode ser acessado pelo usuário");
+        if (!userEntity.equals(user)) throw new AccessForbidden("Usuário tentou acesso a um ChatHistory que não pertencia a ele.");
 
         ChatHistory chatHistory = getChatHistoryById(historyId);
 
@@ -53,18 +54,6 @@ public class ChatService {
         chatHistoryRepository.save(chatHistory.addChatMessages(chatMessage));
 
         return chatHistory;
-    }
-
-    public String getMessagesByChatHistoryIdAsJson(Long historyId) {
-        List<ChatMessage> chatMessages = chatMessageRepository.findChatMessagesByChatHistoryId(historyId);
-
-        return chatMessages.stream()
-                .map(message -> String.format(
-                        "{\"role\": \"%s\", \"message\": \"%s\"}",
-                        message.getSender().value(),
-                        message.getMessageContent()
-                ))
-                .collect(Collectors.joining(",", "{\"messages\": [", "]}"));
     }
 
     public String getAllMessagesByChatHistoryId(Long historyId) {
@@ -82,6 +71,31 @@ public class ChatService {
                 .orElseThrow(() ->
                         new NotFoundException("Histórico de chat não encontrado")
                 );
+    }
+
+    public String getUserChatHistoryByIdAsJson(Long historyId, UserEntity user) throws NotFoundException, AccessForbidden {
+        UserEntity userEntity = chatHistoryRepository
+                .findUserByHistoryId(historyId)
+                .orElseThrow(
+                        () -> new NotFoundException("Histórico de chat não encontrado")
+                );
+
+        if (!userEntity.equals(user)) throw new AccessForbidden("Usuário tentou acesso a um ChatHistory que não pertencia a ele.");
+
+        return getMessagesByChatHistoryIdAsJson(historyId);
+
+    }
+
+    private String getMessagesByChatHistoryIdAsJson(Long historyId) {
+        List<ChatMessage> chatMessages = chatMessageRepository.findChatMessagesByChatHistoryId(historyId);
+
+        return chatMessages.stream()
+                .map(message -> String.format(
+                        "{\"role\": \"%s\", \"message\": \"%s\"}",
+                        message.getSender().value(),
+                        message.getMessageContent()
+                ))
+                .collect(Collectors.joining(",", "{\"messages\": [", "]}"));
     }
 
     private String constructBaseInfo(String name, String description, String tasks, String fileStructure, String diagram) {

@@ -14,6 +14,7 @@ import tech.lastbox.structo.model.ChatHistory;
 import tech.lastbox.structo.model.ChatMessage;
 import tech.lastbox.structo.model.ProjectEntity;
 import tech.lastbox.structo.model.UserEntity;
+import tech.lastbox.structo.model.types.Sender;
 import tech.lastbox.structo.repositories.UserRepository;
 import tech.lastbox.structo.util.prompt.GENERATE;
 
@@ -78,12 +79,16 @@ public class UserService {
     public String createMessage(String message, UserEntity user, Long historyId) throws AccessForbidden, NotFoundException {
         ChatHistory history = chatService.createUserMessage(historyId, message, user);
 
-        return ollamaService.sendPrompt(
-                             GENERATE.USERMESSAGE.data(
-                                    message,
-                                    chatService.getAllMessagesByChatHistoryId(historyId),
-                                    history.getBaseInfo())
-                             ).orElseThrow(OllamaException::new);
+        String response = ollamaService.sendPrompt(
+                GENERATE.USERMESSAGE.data(
+                        message,
+                        chatService.getAllMessagesByChatHistoryId(historyId),
+                        history.getBaseInfo())
+                ).orElseThrow(OllamaException::new);
+
+        ChatMessage responseMessage = chatService.addMessage(Sender.MODEL, response, history);
+
+        return response;
     }
 
     private String getStructure(String description) {
