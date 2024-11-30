@@ -6,11 +6,13 @@ import tech.lastbox.structo.exception.NotFoundException;
 import tech.lastbox.structo.exception.user.AccessForbidden;
 import tech.lastbox.structo.model.ChatHistory;
 import tech.lastbox.structo.model.ChatMessage;
-import tech.lastbox.structo.model.ProjectEntity;
 import tech.lastbox.structo.model.UserEntity;
 import tech.lastbox.structo.model.types.Sender;
 import tech.lastbox.structo.repositories.ChatHistoryRepository;
 import tech.lastbox.structo.repositories.ChatMessageRepository;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class ChatService {
@@ -37,7 +39,7 @@ public class ChatService {
     }
 
     @Transactional
-    public ChatMessage createUserMessage(Long historyId, String messageContent, UserEntity user) throws NotFoundException, AccessForbidden {
+    public ChatHistory createUserMessage(Long historyId, String messageContent, UserEntity user) throws NotFoundException, AccessForbidden {
         UserEntity userEntity = chatHistoryRepository.findUserByHistoryId(historyId)
                                                      .orElseThrow(
                                                          () -> new NotFoundException("Histórico de chat não encontrado")
@@ -50,7 +52,29 @@ public class ChatService {
         ChatMessage chatMessage = chatMessageRepository.save(new ChatMessage(Sender.USER, messageContent));
         chatHistoryRepository.save(chatHistory.addChatMessages(chatMessage));
 
-        return chatMessage;
+        return chatHistory;
+    }
+
+    public String getMessagesByChatHistoryIdAsJson(Long historyId) {
+        List<ChatMessage> chatMessages = chatMessageRepository.findChatMessagesByChatHistoryId(historyId);
+
+        return chatMessages.stream()
+                .map(message -> String.format(
+                        "{\"role\": \"%s\", \"message\": \"%s\"}",
+                        message.getSender().value(),
+                        message.getMessageContent()
+                ))
+                .collect(Collectors.joining(",", "{\"messages\": [", "]}"));
+    }
+
+    public String getAllMessagesByChatHistoryId(Long historyId) {
+        return chatMessageRepository.findChatMessagesByChatHistoryId(historyId).stream()
+                .map(
+                    message ->
+                    message.getSender().value() +
+                    " sent: " + message.getMessageContent()
+                )
+                .collect(Collectors.joining("\n"));
     }
 
     public ChatHistory getChatHistoryById(Long historyId) throws NotFoundException {

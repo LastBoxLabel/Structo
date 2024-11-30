@@ -4,10 +4,14 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import tech.lastbox.structo.dtos.auth.UserDto;
+import tech.lastbox.structo.exception.NotFoundException;
+import tech.lastbox.structo.exception.user.AccessForbidden;
 import tech.lastbox.structo.exception.user.AlreadyExistsException;
 import tech.lastbox.structo.exception.user.InvalidDataException;
 import tech.lastbox.structo.exception.user.OllamaException;
 import tech.lastbox.structo.mappers.UserMapper;
+import tech.lastbox.structo.model.ChatHistory;
+import tech.lastbox.structo.model.ChatMessage;
 import tech.lastbox.structo.model.ProjectEntity;
 import tech.lastbox.structo.model.UserEntity;
 import tech.lastbox.structo.repositories.UserRepository;
@@ -24,13 +28,15 @@ public class UserService {
     private final OllamaService ollamaService;
     private final ProjectService projectService;
     private final BCryptPasswordEncoder passwordEncoder;
+    private final ChatService chatService;
 
-    public UserService(UserRepository userRepository, UserMapper userMapper, OllamaService ollamaService, ProjectService projectService, BCryptPasswordEncoder passwordEncoder) {
+    public UserService(UserRepository userRepository, UserMapper userMapper, OllamaService ollamaService, ProjectService projectService, BCryptPasswordEncoder passwordEncoder, ChatService chatService) {
         this.userRepository = userRepository;
         this.userMapper = userMapper;
         this.ollamaService = ollamaService;
         this.projectService = projectService;
         this.passwordEncoder = passwordEncoder;
+        this.chatService = chatService;
     }
 
     public boolean authenticateUser(String email, String rawPassword) {
@@ -68,23 +74,35 @@ public class UserService {
         return userMapper.toDto(user);
     }
 
+    @Transactional
+    public String createMessage(String message, UserEntity user, Long historyId) throws AccessForbidden, NotFoundException {
+        ChatHistory history = chatService.createUserMessage(historyId, message, user);
+
+        return ollamaService.sendPrompt(
+                             GENERATE.USERMESSAGE.data(
+                                    message,
+                                    chatService.getAllMessagesByChatHistoryId(historyId),
+                                    history.getBaseInfo())
+                             ).orElseThrow(OllamaException::new);
+    }
+
     private String getStructure(String description) {
         return ollamaService.sendPrompt(
-                GENERATE.STRUCTURE.data(description))
-                .orElseThrow(OllamaException::new);
+                            GENERATE.STRUCTURE.data(description))
+                            .orElseThrow(OllamaException::new);
     }
 
     private String getTasks(String description, String structure) {
         return ollamaService.sendPrompt(
-                GENERATE.TASK.data(
-                        String.format("%s%n%nProject structure: %s",description, structure)))
-                .orElseThrow(OllamaException::new);
+                            GENERATE.TASK.data(
+                                    String.format("%s%n%nProject structure: %s",description, structure)))
+                            .orElseThrow(OllamaException::new);
     }
 
     private String getDiagram(String description, String structure, String tasks) {
         return ollamaService.sendPrompt(
-                GENERATE.DIAGRAM.data(
-                        String.format("%s%n%nProject structure: %s%n%nProject tasks: %s", description, structure, tasks)))
-                .orElseThrow(OllamaException::new);
+                            GENERATE.DIAGRAM.data(
+                                    String.format("%s%n%nProject structure: %s%n%nProject tasks: %s", description, structure, tasks)))
+                            .orElseThrow(OllamaException::new);
     }
 }
