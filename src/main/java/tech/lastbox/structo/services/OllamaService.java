@@ -1,7 +1,6 @@
 package tech.lastbox.structo.services;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.springframework.beans.factory.annotation.Value;
@@ -12,6 +11,7 @@ import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import tech.lastbox.structo.dtos.PromptRequest;
+import tech.lastbox.structo.util.prompt.Generate;
 
 import java.util.*;
 
@@ -50,7 +50,6 @@ public class OllamaService {
 
         try {
             JsonNode jsonResponse = responseMapper.readTree(response.getBody());
-
             return Optional.of(jsonResponse.get("response").asText().replace("\\\"", "\""));
         } catch (JsonProcessingException e) {
             return Optional.empty();

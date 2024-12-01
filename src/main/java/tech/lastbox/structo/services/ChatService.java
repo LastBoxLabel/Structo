@@ -12,7 +12,6 @@ import tech.lastbox.structo.repositories.ChatHistoryRepository;
 import tech.lastbox.structo.repositories.ChatMessageRepository;
 
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -34,7 +33,7 @@ public class ChatService {
 
     @Transactional
     public ChatMessage addMessage(Sender sender, String messageContent, ChatHistory chatHistory) {
-        ChatMessage chatMessage = chatMessageRepository.save(new ChatMessage(sender, messageContent));
+        ChatMessage chatMessage = chatMessageRepository.save(new ChatMessage(sender, messageContent, chatHistory));
         chatHistoryRepository.save(chatHistory.addChatMessages(chatMessage));
         return chatMessage;
     }
@@ -50,10 +49,15 @@ public class ChatService {
 
         ChatHistory chatHistory = getChatHistoryById(historyId);
 
-        ChatMessage chatMessage = chatMessageRepository.save(new ChatMessage(Sender.USER, messageContent));
+        ChatMessage chatMessage = chatMessageRepository.save(new ChatMessage(Sender.USER, messageContent, chatHistory));
         chatHistoryRepository.save(chatHistory.addChatMessages(chatMessage));
 
         return chatHistory;
+    }
+
+    @Transactional
+    public void updateHistory(ChatHistory chatHistory) {
+        chatHistoryRepository.saveAndFlush(chatHistory);
     }
 
     public String getAllMessagesByChatHistoryId(Long historyId) {
@@ -73,7 +77,7 @@ public class ChatService {
                 );
     }
 
-    public String getUserChatHistoryByIdAsJson(Long historyId, UserEntity user) throws NotFoundException, AccessForbidden {
+    public List<ChatMessage> getUserChatHistoryByIdAsJson(Long historyId, UserEntity user) throws NotFoundException, AccessForbidden {
         UserEntity userEntity = chatHistoryRepository
                 .findUserByHistoryId(historyId)
                 .orElseThrow(
@@ -86,16 +90,9 @@ public class ChatService {
 
     }
 
-    private String getMessagesByChatHistoryIdAsJson(Long historyId) {
-        List<ChatMessage> chatMessages = chatMessageRepository.findChatMessagesByChatHistoryId(historyId);
+    private List<ChatMessage> getMessagesByChatHistoryIdAsJson(Long historyId) {
 
-        return chatMessages.stream()
-                .map(message -> String.format(
-                        "{\"role\": \"%s\", \"message\": \"%s\"}",
-                        message.getSender().value(),
-                        message.getMessageContent()
-                ))
-                .collect(Collectors.joining(",", "{\"messages\": [", "]}"));
+        return chatMessageRepository.findChatMessagesByChatHistoryId(historyId);
     }
 
     private String constructBaseInfo(String name, String description, String tasks, String fileStructure, String diagram) {
@@ -108,4 +105,5 @@ public class ChatService {
                 name, description, tasks, fileStructure, diagram
         );
     }
+
 }

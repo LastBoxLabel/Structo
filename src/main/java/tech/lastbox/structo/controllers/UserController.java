@@ -1,5 +1,6 @@
 package tech.lastbox.structo.controllers;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpStatus;
@@ -51,6 +52,8 @@ public class UserController {
             return ResponseEntity.status(201).body(userService.createMessage(messageRequest.message(), user, historyId));
         } catch (AccessForbidden | NotFoundException e) {
             logger.error(e.getMessage());
+        } catch (JsonProcessingException e) {
+            return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).body(new ErrorResponse("Falha ao processar resposta.", HttpStatus.SERVICE_UNAVAILABLE));
         }
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponse("Chat não encontrado.", HttpStatus.NOT_FOUND));
     }

@@ -1,6 +1,7 @@
 package tech.lastbox.structo.model;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
 import tech.lastbox.structo.model.types.Sender;
 
@@ -15,11 +16,15 @@ public class ChatMessage {
     @JsonIgnore
     private Long id;
 
+    @Column(nullable = false, columnDefinition = "TEXT")
+    @JsonProperty("message")
     private String messageContent;
 
     @Enumerated(EnumType.STRING)
+    @JsonProperty("role")
     private Sender sender;
 
+    @JsonProperty("timestamp")
     private Instant createdAt = Instant.now();
 
     @ManyToOne
@@ -29,9 +34,10 @@ public class ChatMessage {
 
     public ChatMessage() {}
 
-    public ChatMessage(Sender sender, String messageContent) {
+    public ChatMessage(Sender sender, String messageContent, ChatHistory chatHistory) {
         this.sender = sender;
         this.messageContent = messageContent;
+        this.chatHistory = chatHistory;
     }
 
     public Long getId() {

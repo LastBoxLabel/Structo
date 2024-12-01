@@ -2,6 +2,7 @@ package tech.lastbox.structo.services;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import tech.lastbox.structo.model.ChatHistory;
 import tech.lastbox.structo.model.ProjectEntity;
 import tech.lastbox.structo.model.UserEntity;
 import tech.lastbox.structo.repositories.ProjectRepository;
@@ -19,18 +20,19 @@ public class ProjectService {
 
     @Transactional
     public ProjectEntity createProject(String name, String description, String tasks, String fileStructure, String diagram, UserEntity user) {
-        ProjectEntity project = new ProjectEntity(name, description, tasks, fileStructure, diagram, user);
-
-        project.setChatHistory(
-                chatService.createHistory(
+        ChatHistory chatHistory = chatService.createHistory(
                 name,
                 description,
                 tasks,
                 fileStructure,
                 diagram
-        ));
+        );
 
-        return projectRepository.save(project);
+        ProjectEntity project = projectRepository.save(new ProjectEntity(name, description, tasks, fileStructure, diagram, user));
+
+        chatService.updateHistory(chatHistory.setProject(project));
+
+        return projectRepository.save(project.setChatHistory(chatHistory));
     }
 
 }

@@ -15,10 +15,10 @@ public class ChatHistory {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
-    @Column(nullable = false, length = 10000)
+    @Column(nullable = false, columnDefinition = "TEXT")
     private String baseInfo;
 
-    @OneToOne(cascade = CascadeType.ALL)
+    @OneToOne
     @JsonIgnore
     @JoinColumn(name = "project_id", unique = true)
     private ProjectEntity project;
@@ -60,8 +60,9 @@ public class ChatHistory {
         return project;
     }
 
-    public void setProject(ProjectEntity project) {
+    public ChatHistory setProject(ProjectEntity project) {
         this.project = project;
+        return this;
     }
 
     public List<ChatMessage> getChatMessages() {

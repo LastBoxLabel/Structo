@@ -29,7 +29,7 @@ public class ProjectEntity {
     @Column(nullable=false, length = 4096)
     private String diagram;
 
-    @OneToOne(mappedBy = "project", cascade = CascadeType.ALL)
+    @OneToOne(mappedBy = "project", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private ChatHistory chatHistory;
 
     @ManyToOne
