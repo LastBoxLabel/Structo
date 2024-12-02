@@ -117,7 +117,7 @@ export default function ProjectPage() {
 
         setMessages(messagesData.map((msg: any) => ({
           id: msg.timestamp,
-          content: msg.role === 'MODEL' ? JSON.parse(msg.message).message : msg.message,
+          content: msg.message,
           role: msg.role === 'USER' ? 'user' : 'assistant',
           timestamp: msg.timestamp
         })))
@@ -164,7 +164,7 @@ export default function ProjectPage() {
         timestamp: new Date().toISOString()
       }, {
         id: data.timestamp,
-        content: typeof data === 'string' ? data : JSON.parse(data.message).message,
+        content: data.message,
         role: 'assistant',
         timestamp: data.timestamp
       }])
@@ -187,9 +187,7 @@ export default function ProjectPage() {
       <div className="container mx-auto px-4 py-8">
         <h1 className="text-3xl font-bold mb-6">{project.name}</h1>
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <Card className={`order-2 lg:order-1 chat-transition ${
-            isChatVisible ? 'chat-visible' : 'chat-hidden lg:chat-visible'
-          }`}>
+          <Card className="order-2 lg:order-1 chat-transition" >
             <CardHeader>
               <CardTitle>Chat</CardTitle>
             </CardHeader>
