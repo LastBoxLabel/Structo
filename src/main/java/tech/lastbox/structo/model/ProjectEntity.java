@@ -17,16 +17,16 @@ public class ProjectEntity {
     @Column(nullable=false)
     private String name;
 
-    @Column(nullable=false, length = 4096)
+    @Column(nullable=false, length = 20000)
     private String description;
 
-    @Column(nullable=false, length = 4096)
+    @Column(nullable=false, length = 20000)
     private String tasks;
 
-    @Column(nullable=false, length = 4096)
+    @Column(nullable=false, length = 20000)
     private String fileStructure;
 
-    @Column(nullable=false, length = 4096)
+    @Column(nullable=false, length = 20000)
     private String diagram;
 
     @OneToOne(mappedBy = "project", cascade = CascadeType.ALL, fetch = FetchType.EAGER)

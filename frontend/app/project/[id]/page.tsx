@@ -56,9 +56,8 @@ export default function ProjectPage() {
   const [historyId, setHistoryId] = useState<number | null>(null);
 
   useEffect(() => {
-    const token = localStorage.getItem('Authorization');
+    const token = localStorage.getItem('token');
     if (!token) {
-      // Redireciona para a página de login se o token não existir
       router.push('/login');
       return;
     }
@@ -112,7 +111,7 @@ export default function ProjectPage() {
   const handleSendMessage = async () => {
     if (newMessage.trim() === '' || isLoading) return;
 
-    const token = localStorage.getItem('Authorization');
+    const token = localStorage.getItem('token');
     if (!token) {
       console.error('No authorization token found');
       return;

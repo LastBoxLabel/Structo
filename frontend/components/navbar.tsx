@@ -3,24 +3,29 @@
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { Button } from '../components/ui/button';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { Menu, X } from 'lucide-react';
 
 export function Navbar() {
-  
   const router = useRouter();
+  const pathname = usePathname(); // Hook para obter a URL atual
   const [isOpen, setIsOpen] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
-  useEffect(() => {
+  const checkAuthentication = () => {
     const token = localStorage.getItem('token');
     setIsAuthenticated(!!token);
-  }, []);
+  };
+
+  useEffect(() => {
+    // Verifica o token sempre que a URL mudar
+    checkAuthentication();
+  }, [pathname]); // Executa a cada mudança na rota
 
   const handleLogout = () => {
     localStorage.removeItem('token');
     setIsAuthenticated(false);
-    router.push('/')
+    router.push('/');
   };
 
   return (
@@ -82,7 +87,7 @@ export function Navbar() {
             {isAuthenticated ? (
               <>
                 <Link
-                  href="/projects"
+                  href="/user"
                   className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50"
                 >
                   My Projects

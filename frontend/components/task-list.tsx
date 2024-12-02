@@ -9,7 +9,6 @@ interface TaskListProps {
 }
 
 export function TaskList({ tasks }: TaskListProps) {
-  // Parse the tasks from the JSON string
   const parsedTasks = typeof tasks === 'string'
     ? JSON.parse(tasks).tasks
     : tasks;
