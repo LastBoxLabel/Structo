@@ -16,6 +16,7 @@ import tech.lastbox.structo.exception.user.AccessForbidden;
 import tech.lastbox.structo.mappers.UserMapper;
 import tech.lastbox.structo.model.UserEntity;
 import tech.lastbox.structo.services.ChatService;
+import tech.lastbox.structo.services.ProjectService;
 import tech.lastbox.structo.services.UserService;
 
 @RestController
@@ -25,16 +26,18 @@ public class UserController {
     private final UserMapper userMapper;
     private final UserService userService;
     private final ChatService chatService;
+    private final ProjectService projectService;
     private final Logger logger = LoggerFactory.getLogger(UserController.class);
 
-    public UserController(UserMapper userMapper, UserService userService, ChatService chatService) {
+    public UserController(UserMapper userMapper, UserService userService, ChatService chatService, ProjectService projectService) {
         this.userMapper = userMapper;
         this.userService = userService;
         this.chatService = chatService;
+        this.projectService = projectService;
     }
 
     @GetMapping
-    public ResponseEntity<UserDto> index(){
+    public ResponseEntity<UserDto> getUserDetails(){
         UserEntity user = (UserEntity) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         return ResponseEntity.ok(userMapper.toDto(user));
     }
@@ -45,7 +48,17 @@ public class UserController {
         return ResponseEntity.ok(userService.generateProject(generateRequest.name(), generateRequest.description(), user));
     }
 
-    @PostMapping("/project/{historyId}")
+    @GetMapping("/project/{projectId}")
+    public ResponseEntity<?> getProjectDetails(@PathVariable("projectId") Long projectId) {
+        UserEntity user = (UserEntity) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        try {
+            return ResponseEntity.ok(projectService.getProjectById(projectId, user));
+        } catch (NotFoundException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponse(e, HttpStatus.NOT_FOUND));
+        }
+    }
+
+    @PostMapping("/project/chat/{historyId}")
     public ResponseEntity<?> sendMessage(@PathVariable("historyId") Long historyId, @RequestBody MessageRequest messageRequest) {
         UserEntity user = (UserEntity) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         try {
@@ -58,7 +71,7 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.NOT_FOUND).body(new ErrorResponse("Chat não encontrado.", HttpStatus.NOT_FOUND));
     }
 
-    @GetMapping("/project/{historyId}")
+    @GetMapping("/project/chat/{historyId}")
     public ResponseEntity<?> getMessageHistory(@PathVariable("historyId") Long historyId) {
         UserEntity user = (UserEntity) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         try {

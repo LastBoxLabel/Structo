@@ -2,6 +2,7 @@ package tech.lastbox.structo.services;
 
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import tech.lastbox.structo.exception.NotFoundException;
 import tech.lastbox.structo.model.ChatHistory;
 import tech.lastbox.structo.model.ProjectEntity;
 import tech.lastbox.structo.model.UserEntity;
@@ -16,6 +17,12 @@ public class ProjectService {
     public ProjectService(ProjectRepository projectRepository, ChatService chatService) {
         this.projectRepository = projectRepository;
         this.chatService = chatService;
+    }
+
+    public ProjectEntity getProjectById(Long id, UserEntity user) throws NotFoundException {
+        return projectRepository.findById(id)
+                .filter(project -> project.getUser().equals(user))
+                .orElseThrow(() -> new NotFoundException("Projeto não encontrado."));
     }
 
     @Transactional
