@@ -14,7 +14,7 @@ public class SecurityConfigInitializer {
 
     public SecurityConfigInitializer(SecurityConfig securityConfig) {
         securityConfig.corsAllowCredentials(true)
-                .corsAllowedOrigins(List.of("*"))
+                .corsAllowedOrigins(List.of("http://localhost:3000/"))
                 .setCsrfProtection(false)
                 .corsAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"))
                 .corsAllowedHeaders(List.of("Authorization", "Content-Type", "X-Requested-With"));
