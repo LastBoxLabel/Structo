@@ -12,6 +12,8 @@ import { Mermaid } from '../../../components/mermaid';
 import { FileStructure } from '../../../components/file-structure';
 import { TaskList } from '../../../components/task-list';
 import { ChatFab } from '../../../components/chat-fab';
+import { Copy, Check } from 'lucide-react';
+import { Toaster, toast } from 'sonner';
 
 interface Message {
   id: number;
@@ -43,6 +45,9 @@ interface ProjectEntity {
   tasks: Task[];
   fileStructure: FileStructureNode;
   diagrams: Diagram[];
+  chatHistory: {
+    id: number;
+  };
 }
 
 export default function ProjectPage() {
@@ -54,6 +59,7 @@ export default function ProjectPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [isChatVisible, setIsChatVisible] = useState(false);
   const [historyId, setHistoryId] = useState<number | null>(null);
+  const [copiedDiagram, setCopiedDiagram] = useState<string | null>(null);
 
   useEffect(() => {
     const token = localStorage.getItem('token');
@@ -157,18 +163,35 @@ export default function ProjectPage() {
     setIsChatVisible(!isChatVisible);
   };
 
+  const handleCopyDiagramCode = (diagramCode: string) => {
+    navigator.clipboard.writeText(
+      diagramCode.replace(/```mermaid\s*/, '').replace(/```$/, '').trim()
+    ).then(() => {
+      setCopiedDiagram(diagramCode);
+      toast.success('Código do diagrama copiado!');
+
+      setTimeout(() => {
+        setCopiedDiagram(null);
+      }, 2000);
+    }).catch(err => {
+      console.error('Erro ao copiar:', err);
+      toast.error('Erro ao copiar o código');
+    });
+  };
+
   if (!project) return <div>Loading...</div>;
 
   return (
     <div className="container mx-auto px-4 py-8">
+      <Toaster />
       <h1 className="text-3xl font-bold mb-6">{project.name}</h1>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <Card className="order-2 lg:order-1 chat-transition">
+        <Card className="order-2 lg:order-1 chat-transition h-full flex flex-col">
           <CardHeader>
             <CardTitle>Chat</CardTitle>
           </CardHeader>
-          <CardContent>
-            <ScrollArea className="h-[300px] lg:h-[400px] mb-4">
+          <CardContent className="flex flex-col flex-grow justify-between">
+            <ScrollArea className="flex-grow mb-4 overflow-y-auto h-0">
               {messages.map((message) => (
                 <div
                   key={message.id}
@@ -193,19 +216,65 @@ export default function ProjectPage() {
             </div>
           </CardContent>
         </Card>
-        <Card className="order-1 lg:order-2">
+        <Card className="order-1 lg:order-2 flex-row">
           <CardHeader>
             <CardTitle>Project Details</CardTitle>
           </CardHeader>
           <CardContent>
             <Tabs defaultValue="diagram">
               <TabsList>
-                <TabsTrigger value="diagram">Diagram</TabsTrigger>
-                <TabsTrigger value="structure">File Structure</TabsTrigger>
-                <TabsTrigger value="tasks">Tasks</TabsTrigger>
+                <TabsTrigger value="diagram">Diagramas</TabsTrigger>
+                <TabsTrigger value="structure">Estrutura de Arquivos</TabsTrigger>
+                <TabsTrigger value="tasks">Tarefas</TabsTrigger>
               </TabsList>
               <TabsContent value="diagram">
-                <Mermaid chart={project.diagrams[0]['Mermaid Code']} />
+                <h1><strong>Select one of these Diagrams</strong></h1>
+                <Tabs orientation="horizontal">
+                  <TabsList className="w-full mb-4 flex-wrap h-min">
+                    {project.diagrams.map((diagram, index) => (
+                      <TabsTrigger
+                        key={diagram.Name}
+                        value={`diagram-${index}`}
+                        className="flex-grow"
+                      >
+                        {diagram.Name}
+                      </TabsTrigger>
+                    ))}
+                  </TabsList>
+
+                  {project.diagrams.map((diagram, index) => (
+                    <TabsContent
+                      key={diagram.Name}
+                      value={`diagram-${index}`}
+                      className="relative"
+                    >
+                      <div className="absolute top-2 right-2 z-10">
+                        <Button
+                          size="icon"
+                          onClick={() => handleCopyDiagramCode(diagram['Mermaid Code'])}
+                          className="w-8 h-8"
+                        >
+                          {copiedDiagram === diagram['Mermaid Code'] ? (
+                            <Check className="w-4 h-4 text-green-500" />
+                          ) : (
+                            <Copy className="w-4 h-4" />
+                          )}
+                        </Button>
+                      </div>
+                      <Card className="mt-2">
+                        <CardHeader>
+                          <CardTitle>{diagram.Name}</CardTitle>
+                        </CardHeader>
+                        <CardContent>
+                          <p className="text-sm text-muted-foreground mb-4">
+                            {diagram.Description}
+                          </p>
+                          <Mermaid chart={diagram['Mermaid Code']} />
+                        </CardContent>
+                      </Card>
+                    </TabsContent>
+                  ))}
+                </Tabs>
               </TabsContent>
               <TabsContent value="structure">
                 <FileStructure structure={project.fileStructure} />

@@ -1,6 +1,6 @@
-"use client";
+'use client';
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import mermaid from "mermaid";
 
 interface MermaidProps {
@@ -16,37 +16,94 @@ function cleanMermaidCode(rawCode: string): string {
 
 export function Mermaid({ chart }: MermaidProps) {
   const mermaidRef = useRef<HTMLDivElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const [scale, setScale] = useState(1);
+  const [translate, setTranslate] = useState({ x: 0, y: 0 });
 
   useEffect(() => {
     if (mermaidRef.current) {
       try {
         const cleanedChart = cleanMermaidCode(chart);
 
-        if (mermaid) {
-          if (!mermaid.mermaidAPI) {
-            console.error("Mermaid API não está disponível.");
-            return;
-          }
+        mermaid.initialize({ startOnLoad: false });
 
-          mermaid.initialize({ startOnLoad: false });
+        const uniqueId = `mermaid-${Math.random().toString(36).substr(2, 9)}`;
 
-          const uniqueId = `mermaid-${Math.random().toString(36).substr(2, 9)}`;
-
-          mermaid.render(uniqueId, cleanedChart).then((result) => {
+        mermaid
+          .render(uniqueId, cleanedChart)
+          .then((result) => {
             if (mermaidRef.current) {
               mermaidRef.current.innerHTML = result.svg;
+
+              const svgElement = mermaidRef.current.querySelector("svg");
+
+              if (svgElement && containerRef.current) {
+                const containerBounds = containerRef.current.getBoundingClientRect();
+                const contentBounds = svgElement.getBoundingClientRect();
+
+                const offsetX =
+                  (containerBounds.width - contentBounds.width * scale) / 2;
+                const offsetY =
+                  (containerBounds.height - contentBounds.height * scale) / 2;
+
+                setTranslate({
+                  x: Math.max(offsetX, 0),
+                  y: Math.max(offsetY, 0),
+                });
+              }
             }
-          }).catch((error) => {
+          })
+          .catch((error) => {
             console.error("Erro ao renderizar o gráfico Mermaid:", error);
           });
-        } else {
-          console.error("Mermaid não foi carregado corretamente.");
-        }
       } catch (error) {
         console.error("Erro ao processar o gráfico:", error);
       }
     }
-  }, [chart]);
+  }, [chart, scale]);
 
-  return <div ref={mermaidRef} />;
+  const handleZoomIn = () => {
+    setScale((prev) => Math.min(prev + 0.1, 3));
+  };
+
+  const handleZoomOut = () => {
+    setScale((prev) => Math.max(prev - 0.1, 0.5));
+  };
+
+  const handleResetZoom = () => {
+    setScale(1);
+  };
+
+  return (
+    <div className="relative">
+      <div className="absolute right-2 top-2 z-10 flex gap-2">
+        <button onClick={handleZoomIn} className="px-2 py-1 bg-gray-300 rounded">
+          +
+        </button>
+        <button onClick={handleZoomOut} className="px-2 py-1 bg-gray-300 rounded">
+          -
+        </button>
+        <button onClick={handleResetZoom} className="px-2 py-1 bg-gray-300 rounded">
+          Reset
+        </button>
+      </div>
+      <div
+        ref={containerRef}
+        className="overflow-auto border border-gray-300 rounded"
+        style={{
+          width: "100%",
+          height: "400px",
+          position: "relative",
+        }}
+      >
+        <div
+          ref={mermaidRef}
+          style={{
+            transform: `translate(${translate.x}px, ${translate.y}px) scale(${scale})`,
+            transformOrigin: "top left",
+          }}
+        />
+      </div>
+    </div>
+  );
 }
