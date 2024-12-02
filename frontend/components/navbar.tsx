@@ -1,12 +1,27 @@
-"use client"
+'use client';
 
-import Link from 'next/link'
-import { useState } from 'react'
-import { Button } from '../components/ui/button'
-import { Menu, X } from 'lucide-react'
+import Link from 'next/link';
+import { useState, useEffect } from 'react';
+import { Button } from '../components/ui/button';
+import { useRouter } from 'next/navigation';
+import { Menu, X } from 'lucide-react';
 
 export function Navbar() {
-  const [isOpen, setIsOpen] = useState(false)
+  
+  const router = useRouter();
+  const [isOpen, setIsOpen] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    setIsAuthenticated(!!token);
+  }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    setIsAuthenticated(false);
+    router.push('/')
+  };
 
   return (
     <nav className="bg-background shadow-sm">
@@ -19,12 +34,31 @@ export function Navbar() {
           </div>
           <div className="hidden md:block">
             <div className="ml-10 flex items-baseline space-x-4">
-              <Link href="/login" className="text-gray-600 hover:text-gray-900">
-                Login
-              </Link>
-              <Button asChild>
-                <Link href="/register">Register</Link>
-              </Button>
+              {isAuthenticated ? (
+                <>
+                  <Link
+                    href="/user"
+                    className="text-gray-600 hover:text-gray-900"
+                  >
+                    My Projects
+                  </Link>
+                  <Button variant="outline" onClick={handleLogout}>
+                    Logout
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Link
+                    href="/login"
+                    className="text-gray-600 hover:text-gray-900"
+                  >
+                    Login
+                  </Link>
+                  <Button asChild>
+                    <Link href="/register">Register</Link>
+                  </Button>
+                </>
+              )}
             </div>
           </div>
           <div className="md:hidden">
@@ -45,22 +79,40 @@ export function Navbar() {
       {isOpen && (
         <div className="md:hidden">
           <div className="px-2 pt-2 pb-3 space-y-1 sm:px-3">
-            <Link
-              href="/login"
-              className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50"
-            >
-              Login
-            </Link>
-            <Link
-              href="/register"
-              className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50"
-            >
-              Register
-            </Link>
+            {isAuthenticated ? (
+              <>
+                <Link
+                  href="/projects"
+                  className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50"
+                >
+                  My Projects
+                </Link>
+                <button
+                  onClick={handleLogout}
+                  className="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50"
+                >
+                  Logout
+                </button>
+              </>
+            ) : (
+              <>
+                <Link
+                  href="/login"
+                  className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50"
+                >
+                  Login
+                </Link>
+                <Link
+                  href="/register"
+                  className="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50"
+                >
+                  Register
+                </Link>
+              </>
+            )}
           </div>
         </div>
       )}
     </nav>
-  )
+  );
 }
-

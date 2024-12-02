@@ -1,7 +1,9 @@
-"use client"
+'use client';
 
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import axios from 'axios';
 import { Card, CardHeader, CardTitle, CardDescription } from '../../components/ui/card';
 
 interface Project {
@@ -10,40 +12,24 @@ interface Project {
   description: string;
 }
 
-interface User {
-  id: number;
-  name: string;
-  username: string;
-  email: string;
-  projectEntities: Project[];
-}
-
 export default function UserPage() {
   const [projects, setProjects] = useState<Project[]>([]);
+  const router = useRouter();
 
   useEffect(() => {
     const fetchProjects = async () => {
-      const token = localStorage.getItem('Authorization');
+      const token = localStorage.getItem('token');
       if (!token) {
-        console.error('No authorization token found');
+        router.push('/login');
         return;
       }
 
       try {
-        const response = await fetch('http://localhost:8080/user', {
-          method: 'GET',
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`
-          },
+        const response = await axios.get('http://localhost:8080/user', {
+          headers: { Authorization: `Bearer ${token}` },
         });
 
-        if (!response.ok) {
-          console.error('Failed to fetch user data');
-          return;
-        }
-
-        const user: User = await response.json();
+        const user = response.data;
         setProjects(user.projectEntities);
       } catch (error) {
         console.error('Failed to fetch projects:', error);
@@ -51,7 +37,7 @@ export default function UserPage() {
     };
 
     fetchProjects();
-  }, []);
+  }, [router]);
 
   return (
     <div className="container mx-auto px-4 py-8">

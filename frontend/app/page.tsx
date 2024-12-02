@@ -1,5 +1,3 @@
-import Link from 'next/link'
-import { Button } from '../components/ui/button'
 
 export default function Home() {
   return (
@@ -11,16 +9,7 @@ export default function Home() {
         <p className="text-xl sm:text-2xl mb-8">
           A system for planning and visualization of IT projects
         </p>
-        <div className="flex flex-col sm:flex-row gap-4">
-          <Button asChild size="lg">
-            <Link href="/login">Login</Link>
-          </Button>
-          <Button asChild size="lg" variant="outline">
-            <Link href="/register">Register</Link>
-          </Button>
-        </div>
       </main>
     </div>
-  )
+  );
 }
-
