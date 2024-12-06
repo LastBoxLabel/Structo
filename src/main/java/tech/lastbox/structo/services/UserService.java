@@ -119,6 +119,10 @@ public class UserService {
     private String treatResponseForUserMessage(String rawResponse) throws JsonProcessingException {
         ObjectMapper responseMapper = new ObjectMapper();
         JsonNode jsonResponse = responseMapper.readTree(rawResponse);
-        return jsonResponse.get("message").asText();
+        try {
+            return jsonResponse.get("message").asText();
+        } catch (Exception e) {
+            return jsonResponse.get("response").asText();
+        }
     }
 }
