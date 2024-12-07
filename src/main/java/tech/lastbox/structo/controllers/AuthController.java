@@ -51,7 +51,7 @@ public class AuthController {
         } catch (AlreadyExistsException alreadyExistsException) {
             return ResponseEntity.status(HttpStatus.CONFLICT).body(new ErrorResponse(alreadyExistsException, HttpStatus.CONFLICT));
         } catch (InvalidDataException invalidDataException) {
-            return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(new ErrorResponse(invalidDataException, HttpStatus.NOT_ACCEPTABLE));
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ErrorResponse(invalidDataException, HttpStatus.BAD_REQUEST));
         } catch (RuntimeException e) {
             throw new RuntimeException(e);
         }
